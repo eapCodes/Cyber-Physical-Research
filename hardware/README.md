@@ -136,3 +136,63 @@ I documented the two primary approaches to current limiting:
 Resistors typically have a 5% or 10% tolerance. I noted that a "calculated" safe value like 437Ω might actually be lower in physical reality due to manufacturing variance. Choosing a 625Ω resistor provides a massive "Safety Factor," ensuring that even with low-tolerance components, the current never exceeds the safe threshold of the Arduino R4.
 
 ---
+
+## Lesson 3: Multi-Component Arrays & Scalable Logic
+**Date:** April 11, 2026
+
+### I. Circuit Architecture (The 4-LED Array)
+For this lesson, I expanded from a single LED to a 4-component array. This required a transition from basic point-to-point wiring to a more organized "Bus" architecture.
+
+* **Common Ground Bus:** Utilized the blue breadboard rail to tie all LED cathodes to a single Ground (GND) return path. 
+* **Discrete Current Limiting:** Following the "Worst-Case Design" principles from Lesson 2, I assigned a dedicated resistor to each LED branch. This prevents "Thermal Runaway"—a scenario where one LED draws too much current, fails, and causes a domino effect across the remaining components.
+* **Pin Mapping:** Selected Digital Pins 2, 3, 4, and 5. This avoids Pins 0 and 1 (reserved for Serial RX/TX) and provides a contiguous range for easier programmatic indexing.
+
+### II. Algorithmic Improvements
+As a Computer Science student, I refactored the control logic to handle multiple outputs efficiently.
+
+1. **Array Implementation:** Instead of declaring four separate integers, I stored the pin numbers in an array: `int ledPins[] = {2, 3, 4, 5};`.
+2. **Setup Optimization:** Used a `for` loop in `void setup()` to initialize all pins as `OUTPUT` in just three lines of code.
+3. **Sequence Logic:** Experimented with "Chasing" patterns, which introduced the concept of iterating through an array index to control hardware state.
+
+### III. Hardware Checklist (Pre-Flight)
+Before powering the board, I performed a technical audit:
+* **Trace Analysis:** Verified each LED Anode (long leg) has a direct path to its assigned GPIO pin.
+* **Bridge Check:** Ensured no metal legs were touching adjacent rows, which would cause a short circuit.
+* **Load Calculation:** 4 LEDs at ~15mA each = 60mA total. This is well within the Arduino R4's aggregate current limit (~200mA).
+
+### IV. Implementation: Sequential LED Control
+**Objective:** Program a 4-LED "Chasing" sequence across Digital Pins 2-5.
+
+#### Initial Functional Code
+This version uses a linear approach to verify hardware connectivity and timing for each individual LED branch.
+
+```cpp
+void setup() {
+  // Initializing consecutive pins 2-5 as OUTPUT
+  pinMode(2, OUTPUT);
+  pinMode(3, OUTPUT);
+  pinMode(4, OUTPUT);
+  pinMode(5, OUTPUT);
+}
+
+void loop() {
+  // Sequence: LED 2 -> 3 -> 4 -> 5
+  digitalWrite(2, HIGH);
+  delay(500);
+  digitalWrite(2, LOW);
+
+  digitalWrite(3, HIGH);
+  delay(500);
+  digitalWrite(3, LOW);
+
+  digitalWrite(4, HIGH);
+  delay(500);
+  digitalWrite(4, LOW);
+
+  digitalWrite(5, HIGH);
+  delay(500);
+  digitalWrite(5, LOW);
+}
+```
+
+---
