@@ -116,3 +116,23 @@ void loop() {
   
   delay(3000); 
 }
+```
+
+### VII. Supplemental Analysis: Worst-Case Circuit Design
+In a professional engineering environment, systems are often designed around "Worst-Case" scenarios to ensure long-term hardware reliability and fail-safe operation.
+
+#### 1. The 625Ω Conservative Margin
+While standard calculations suggest a 220Ω resistor for maximum brightness, I explored the rationale for a **625Ω** implementation. 
+* **The Goal:** Limit current draw to a strict **8mA maximum**.
+* **The Calculation:** $R = V_{source} / I_{max} \rightarrow 5V / 0.008A = 625\Omega$.
+* **The Logic:** This calculation assumes the LED has failed and turned into a short circuit (0V drop). By using 625Ω, the Arduino GPIO pin is protected from overcurrent even in the event of a total component failure.
+
+#### 2. Engineering Trade-offs: Reliability vs. Performance
+I documented the two primary approaches to current limiting:
+* **Standard Performance (220Ω - 437Ω):** Prioritizes luminosity and standard operating current (~15-20mA). 
+* **High Reliability (625Ω+):** Prioritizes the absolute lifespan of the microcontroller. By running at 8mA, the thermal stress on the IC (Integrated Circuit) is minimized, though the LED output is reduced.
+
+#### 3. Component Tolerance & Safety Factors
+Resistors typically have a 5% or 10% tolerance. I noted that a "calculated" safe value like 437Ω might actually be lower in physical reality due to manufacturing variance. Choosing a 625Ω resistor provides a massive "Safety Factor," ensuring that even with low-tolerance components, the current never exceeds the safe threshold of the Arduino R4.
+
+---
