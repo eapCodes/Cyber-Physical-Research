@@ -196,3 +196,79 @@ void loop() {
 ```
 
 ---
+
+## Lesson 4: Circuit Topology & Professional Breadboarding
+**Date:** April 12, 2026
+
+### I. Physical Layout Optimization
+This lesson focused on transitioning from "functional" wiring to "professional" wiring. A clean breadboard isn't just for looks; it reduces "mental load" during debugging and prevents accidental shorts.
+
+* **Common Ground Bus:** Utilized the blue breadboard rail to tie all LED cathodes to a single Ground (GND) return path. This is a fundamental concept in PCB design—sharing a return path to simplify routing.
+* **Component Orientation:** Standardized the direction of all LEDs and resistors. Aligning components in the same direction allows for a "quick-glance" audit of circuit polarity.
+* **Spatial Management:** Positioned components to be "packed but not touching." This keeps the footprint small while ensuring no metal legs bridge across adjacent rows.
+
+### II. Engineering Decisions & Constraints
+* **Pin Sequencing:** Refactored the hardware to use an ascending pin sequence (2, 3, 4, 5). This aligns the physical wires with programmatic array indexing, making the code more intuitive.
+* **Resource Preservation:** While the lesson suggested cutting resistor legs for a lower profile, I made the strategic decision to keep the full lead length. 
+  * **Rationale:** As a student with a limited component kit, preserving the structural integrity of the resistors allows for maximum flexibility in future, larger-scale builds. This is a practical example of **Resource Management**.
+
+### III. Hardware Audit
+Checked for "Bridges" (accidental connections) across the center divot and confirmed that each of the 4 LED branches has a dedicated current-limiting resistor to prevent "Thermal Runaway" (where one failing LED kills the rest of the circuit).
+---
+
+## Lesson 5: Binary Theory & The Digital Foundation
+**Date:** April 12, 2026
+
+### I. The Universal Language of Numbers
+This lesson bridged the gap between physical hardware and Computer Science theory. I explored the concept that all computer data—from simple text to high-definition video—is fundamentally numerical.
+* **The Logic Gate:** At the lowest hardware level, everything is controlled by physical "switches" in a state of **0 (Off)** or **1 (On)**.
+* **Moore's Law:** Observed the industry trend where transistor density doubles roughly every 18 months, allowing for the massive processing power we see in modern microcontrollers like the Arduino R4.
+
+### II. Binary Mathematics (Base-2)
+I practiced the "Carry the One" logic in Binary, comparing it to our standard Decimal (Base-10) system. Understanding how bits ($2^n$) represent values is essential for efficient embedded programming.
+
+**Binary-to-Decimal Mapping used in Lab:**
+| Bit Weight | Pin Assignment | Decimal Value |
+| :--- | :--- | :--- |
+| $2^3$ | Pin 2 | 8 |
+| $2^2$ | Pin 3 | 4 |
+| $2^1$ | Pin 4 | 2 |
+| $2^0$ | Pin 5 | 1 |
+
+### III. Homework: 4-Bit LED Counter
+**Objective:** Program the 4-LED array to visually represent a binary counter from 0 to 15.
+
+#### Implementation: Manual Logic Verification
+I chose to write out the full binary sequence manually (Brute Force). This ensured 100% accuracy in bit-weighting and hardware mapping before moving toward programmatic optimization. 
+
+*Note: For the sake of readability in this documentation, I have included a snippet of the logic below. The full 16-state implementation was verified on hardware.*
+
+```cpp
+void setup() {
+  pinMode(2, OUTPUT); // MSB (8)
+  pinMode(3, OUTPUT); // (4)
+  pinMode(4, OUTPUT); // (2)
+  pinMode(5, OUTPUT); // LSB (1)
+}
+
+void loop() {
+  // Logic for Decimal 3 (Binary 0011)
+  digitalWrite(4, HIGH); // bit 2^1
+  digitalWrite(5, HIGH); // bit 2^0
+  delay(250);
+  digitalWrite(4, LOW);
+  digitalWrite(5, LOW);
+  delay(1000);
+
+  // Logic for Decimal 7 (Binary 0111)
+  digitalWrite(3, HIGH); // bit 2^2
+  digitalWrite(4, HIGH); // bit 2^1
+  digitalWrite(5, HIGH); // bit 2^0
+  delay(250);
+  digitalWrite(3, LOW);
+  digitalWrite(4, LOW);
+  digitalWrite(5, LOW);
+  delay(1000);
+}
+```
+---
