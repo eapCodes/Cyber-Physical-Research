@@ -274,6 +274,7 @@ void loop() {
 ---
 
 ## Lesson 6: 5-Bit Binary Counter Implementation
+**Date:** April 13, 2026
 
 ## Class Notes & Review
 * **Objective:** Review the breadboard circuit and expand the binary counter capacity.
