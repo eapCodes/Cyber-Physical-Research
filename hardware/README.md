@@ -272,3 +272,69 @@ void loop() {
 }
 ```
 ---
+
+## Lesson 6: 5-Bit Binary Counter Implementation
+
+## Class Notes & Review
+* **Objective:** Review the breadboard circuit and expand the binary counter capacity.
+* **Progress:** The course is currently reviewing the physical circuit and the logic used in previous steps. 
+* **Focus:** Binary math theory is scheduled for next week; this week is about hardware execution and manual bit mapping.
+* **Homework:** Add a 5th LED to the circuit to increase the counting range.
+
+## Hardware Configuration
+With the addition of the 5th LED, the bit weightings are now defined as:
+* **LED 5:** 16 (Pin 2)
+* **LED 4:** 8 (Pin 3)
+* **LED 3:** 4 (Pin 4)
+* **LED 2:** 2 (Pin 5)
+* **LED 1:** 1 (Pin 6)
+* **Total Capacity:** 0 to 31 ($2^5 - 1$)
+
+---
+
+## Circuit Code
+
+```cpp
+/*
+ * Lesson 6: 5-Bit Binary Counter
+ * Based on manual pattern mapping (16, 8, 4, 2, 1)
+ */
+
+void setup() {
+  // Setup the 5 pins used for the LEDs
+  pinMode(2, OUTPUT); // 16s
+  pinMode(3, OUTPUT); // 8s
+  pinMode(4, OUTPUT); // 4s
+  pinMode(5, OUTPUT); // 2s
+  pinMode(6, OUTPUT); // 1s
+}
+
+void loop() {
+  // Manual count sequence example
+  // 0: (0,0,0,0,0)
+  displayBinary(0, 0, 0, 0, 0);
+  delay(1000);
+
+  // 1: (0,0,0,0,1)
+  displayBinary(0, 0, 0, 0, 1);
+  delay(1000);
+
+  // 16: (1,0,0,0,0)
+  displayBinary(1, 0, 0, 0, 0);
+  delay(1000);
+
+  // 31: (1,1,1,1,1)
+  displayBinary(1, 1, 1, 1, 1);
+  delay(1000);
+}
+
+// Function to translate 1s and 0s to Pin High/Low
+void displayBinary(int b16, int b8, int b4, int b2, int b1) {
+  digitalWrite(2, b16); 
+  digitalWrite(3, b8); 
+  digitalWrite(4, b4); 
+  digitalWrite(5, b2); 
+  digitalWrite(6, b1); 
+}
+```
+---
