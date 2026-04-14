@@ -339,3 +339,84 @@ void displayBinary(int b16, int b8, int b4, int b2, int b1) {
 }
 ```
 ---
+# Lesson 7: Binary Foundations & Computational Logic
+**Date:** April 13, 2026  
+**Category:** Embedded Systems Architecture
+
+---
+
+## Objective
+To master binary arithmetic (Base-2) at the logic level. This foundation is essential for understanding how the **ARM Cortex-M4** processor handles data, manages memory, and mitigates risks such as integer overflows in industrial control loops.
+
+---
+
+## Technical Task: Manual Binary Multiplication
+**Problem Statement:** Multiply `1001` (Decimal 9) by `1011` (Decimal 11).
+
+### Execution (Shift and Add Algorithm)
+This exercise simulates the behavior of an **Arithmetic Logic Unit (ALU)** performing multiplication without higher-level abstraction.
+
+| Logic Step | Operation | Binary Result |
+| :--- | :--- | :--- |
+| **Input A** | Base Value | `1001` (9) |
+| **Input B** | Multiplier | `1011` (11) |
+| **Partial 1** | $1001 \times 1$ | `00001001` |
+| **Partial 2** | $1001 \times 1$ (Shift Left 1) | `00010010` |
+| **Partial 3** | $1001 \times 0$ (Shift Left 2) | `00000000` |
+| **Partial 4** | $1001 \times 1$ (Shift Left 3) | `01001000` |
+| **Final Sum** | **Total Accumulation** | **`01100011`** |
+
+**Verification:** $01100011_2 = 64 + 32 + 2 + 1 = \mathbf{99_{10}}$
+---
+# Lesson 8: Circuit Pre-Visualization & Variable Architecture
+**Date:** April 14, 2026  
+**Category:** Embedded Systems Logic
+
+---
+
+## Objective
+Transitioning from hard-coded literals to dynamic, variable-based architecture. This lesson focuses on circuit planning and the use of descriptive identifiers to increase code portability and system resilience.
+
+---
+
+## Schematic Analysis & Hardware Protection
+* **Pre-Prototyping:** Calculated hardware requirements and load limits prior to physical assembly to mitigate the risk of over-current.
+* **Current Limiting:** Integrated 1,000Ω resistors in series with the LED components to ensure I/O pin current remains within the safe operating area (SOA) for the Arduino Uno R4.
+
+---
+
+## Implementation: Multi-Channel Timing Control
+The following source code demonstrates the removal of "magic numbers" in favor of global variables. This allows for centralized timing adjustments and improves long-term maintainability.
+
+```cpp
+int redLed=8;
+int greenLed=7;
+int greenWait=150;
+int redWait=500;
+int endwait=1000;
+
+void setup() {
+  // Initialization of I/O pins as Output
+  pinMode(redLed, OUTPUT);
+  pinMode(greenLed, OUTPUT);
+}
+
+void loop() {
+  // Channel 1: High-Frequency Oscillation (5 Cycles)
+  digitalWrite(greenLed, HIGH);
+  delay(greenWait);
+  digitalWrite(greenLed, LOW);
+  delay(greenWait);
+  // [Repeated for 5 cycles...]
+
+  // Channel 2: Low-Frequency Oscillation (10 Cycles)
+  digitalWrite(redLed, HIGH);
+  delay(redWait);
+  digitalWrite(redLed, LOW);
+  delay(redWait);
+  // [Repeated for 10 cycles...]
+
+  delay(endwait); // System dwell time between cycles
+}
+```
+
