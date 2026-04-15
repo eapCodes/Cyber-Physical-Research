@@ -514,3 +514,35 @@ void loop() {
   }
 }
 ```
+# Lesson 11: Pulse Width Modulation (PWM) Simulation of Analog Voltage
+**Date:** April 15, 2026  
+**Category:** Embedded Systems
+
+---
+
+### Objective
+Learning the inner workings of Pulse Width Modulation (PWM) and simulating analog voltage in a digital environment.
+
+---
+
+### I. Technical Specifications & Hardware Theory
+* **Simulating Analog:** The Arduino utilizes the average of actuating an LED faster than humans can perceive, achieving an analog effect on a digital device.
+* **8-Bit PWM Resolution:** While the Arduino Uno R4 is a 32-bit system, the PWM registers are 8-bit. Since digital devices only perceive 1s and 0s (0V or 5V), simulating analog means averaging the LED's "on" time vs "off" time to achieve voltages between the 0V and 5V boundaries.
+* **Using a Visual Representation:** Using an oscilloscope provides a visual representation of the voltage switching on and off every millisecond, demonstrating how signal averaging delivers a simulated analog case.
+
+---
+
+### II. Implementation (Firmware Architecture)
+Digital devices in our system can only perceive 1s and 0s—specifically 0V or 5V. If we require a voltage value between those boundaries, we must use PWM. By flickering the LED on and off faster than we can perceive, we add the "on" time to the total cycle time to produce the required average voltage.
+
+| Target Voltage | Duty Cycle (%) | 8-Bit Value (0-255) | Signal State Description |
+| :--- | :--- | :--- | :--- |
+| **1.0V** | 20% | 51 | 20% On / 80% Off |
+| **2.5V** | 50% | 127 | 50% On / 50% Off (Exact Half) |
+| **5.0V** | 100% | 255 | 100% On (Full Power) |
+
+---
+
+### III. Technical Summary & Observations
+* **Persistence of Vision:** The success of the simulation depends on the delay timing; if the frequency is too slow, the eye will see flickering instead of a smooth fade.
+* **Precision:** Because we use an 8-bit range (0-255), we have to round to the nearest whole number to get as close to our target voltage as possible.
