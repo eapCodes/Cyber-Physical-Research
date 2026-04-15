@@ -546,3 +546,57 @@ Digital devices in our system can only perceive 1s and 0s—specifically 0V or 5
 ### III. Technical Summary & Observations
 * **Persistence of Vision:** The success of the simulation depends on the delay timing; if the frequency is too slow, the eye will see flickering instead of a smooth fade.
 * **Precision:** Because we use an 8-bit range (0-255), we have to round to the nearest whole number to get as close to our target voltage as possible.
+
+---
+# Lesson 12: Analog Input Calibration & Linear Scaling
+**Date:** April 15, 2026  
+**Category:** Embedded Systems & Circuit Design
+
+---
+
+### Objective
+Iterating on the utilization of a **Potentiometer** to gauge voltage levels from a GPIO pin. We are implementing linear equations to calculate a valid translation from digital "steps" to human-readable voltage.
+
+---
+
+### I. Technical Specifications & Hardware Theory
+* **10-Bit ADC Resolution:** The Arduino's Analog-to-Digital Converter maps input voltages (0V to 5V) into a 10-bit integer range (0 to 1023). 
+* **Linear Transformation:** To convert the raw digital value into a Voltage, we utilize the **Point-Slope Form** of a linear equation:  
+  $y - y_1 = m(x - x_1)$
+* **Calculating the Slope ($m$):** Using our boundaries where $(0, 0)$ is the minimum and $(1023, 5)$ is the maximum, the slope is derived as:  
+  $m = \frac{5.0 - 0.0}{1023.0 - 0.0} \approx 0.00488$
+
+---
+
+### II. Implementation (Firmware Architecture)
+The following source code utilizes a manual calculation of the slope to translate the 10-bit potentiometer signal into a voltage float. This demonstrates how to handle data translation without built-in library functions.
+
+```cpp
+int redPin = 8;
+int potPin = A2;
+int potVal;
+float bright;
+int br = 9600;
+int waitT = 30;
+
+void setup() {
+  pinMode(redPin, OUTPUT);
+  pinMode(potPin, INPUT);
+  Serial.begin(br);
+}
+
+void loop() {
+  potVal = analogRead(potPin);
+  
+  // Applying the line equation to find the voltage equivalent
+  // (5.0 / 1023.0) represents the slope 'm'
+  bright = (5./1023.) * potVal; 
+  
+  analogWrite(redPin, bright);
+  
+  Serial.print("Voltage: ");
+  Serial.println(bright);
+  
+  delay(waitT);
+}
+```
