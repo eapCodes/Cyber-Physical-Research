@@ -467,3 +467,50 @@ void loop() {
   delay(lightDelay);      // Execute temporal delay
 }
 ```
+# Lesson 10: Writing Analog Voltage with Arduino
+**Date:** April 15, 2026  
+**Category:** Pulse Width Modulation (PWM) & Iterative Logic
+
+---
+
+## I. Technical Objective
+The primary objective of this lesson was implementing **Pulse Width Modulation (PWM)** utilizing the MCU's internal hardware timers. This technique allows for variable power delivery to an LED, effectively simulating an analog voltage ramp through high-frequency digital switching.
+
+---
+
+## II. System Architecture
+* **32-Bit Integration:** Developed firmware for a 32-bit architecture, mapping a 0–100% duty cycle to an 8-bit integer range (0–255).
+* **Single Point of Definition:** Utilized global variables for pin assignments and timing parameters. This architectural choice ensures a "single point of definition," allowing for seamless system recalibration and hardware migration.
+* **Boundary Condition Management:** Identified potential integer overflow risks if values exceed the 8-bit limit (255). This was resolved by enforcing strict boundary conditions within the iterative execution loops.
+
+---
+
+## III. Implementation (Homework: LED Fading Pulse)
+The following source code demonstrates the use of parameterized loops to create a smooth brightness transition (fade). By avoiding hard-coded "magic numbers," the code remains readable and maintainable.
+
+```cpp
+// --- Global Configuration ---
+int redLed = 11;      // PWM-capable digital pin
+int waitT = 30;       // Temporal resolution (30ms dwell time)
+int fadeMax = 255;    // Upper operational boundary
+int fadeMin = 0;      // Lower operational boundary
+int fadeSpeed = 5;    // Iterative step value
+
+void setup() {
+  pinMode(redLed, OUTPUT);
+}
+
+void loop() {
+  // Phase 1: Increasing Duty Cycle (Ramping Up)
+  for(int i = fadeMin; i <= fadeMax; i += fadeSpeed) {
+    analogWrite(redLed, i);
+    delay(waitT);
+  }
+
+  // Phase 2: Decreasing Duty Cycle (Ramping Down)
+  for(int i = fadeMax; i >= fadeMin; i -= fadeSpeed) {
+    analogWrite(redLed, i);
+    delay(waitT);
+  }
+}
+```
