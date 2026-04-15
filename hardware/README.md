@@ -419,4 +419,51 @@ void loop() {
   delay(endwait); // System dwell time between cycles
 }
 ```
+## Lesson 9: Serial Communication & String-Based Debugging
+**Date:** April 14, 2026  
+**Category:** Human-Machine Interface (HMI)
 
+---
+
+### I. Objective
+The goal of this session is to implement **Serial Communication** between the Arduino UNO R4 and the host workstation. By utilizing the **UART (Universal Asynchronous Receiver-Transmitter)** protocol, we can extract real-time status reports from the microcontroller to verify logic execution and system health.
+
+### II. System Architecture: Telemetry & Status Reporting
+* **Baud Rate Configuration:** Established a connection speed of **9600 bits per second (baud)** to ensure stable data transmission without packet loss or character corruption.
+* **String Allocation:** Initialized global `String` variables to manage the status data. This reduces computational overhead by avoiding constant redeclaration within the iterative loop.
+* **Terminal Feedback:** Integrated the Serial Monitor as a **virtual terminal**, providing a high-visibility "window" into the internal logic states of the controller.
+
+### III. Implementation: Serial Debugging Script
+This source code establishes a synchronized feedback loop where every physical change in the LED state is accompanied by a digital status report sent to the console.
+
+```cpp
+/* * Lesson 9: Serial Debugging & Logic Verification
+ * Objective: Establish real-time telemetry for LED states
+ */
+
+// Global Variable Initialization
+int redPin = 8;
+int lightDelay = 1000;
+String pinOn = "The LED is ON ";
+String pinOff = "The LED is OFF";
+
+void setup() {
+  // Initialize Serial Communication at 9600 bps
+  Serial.begin(9600);
+  
+  // Configure GPIO Pin Mode
+  pinMode(redPin, OUTPUT);
+}
+
+void loop() {
+  // State 1: Active-HIGH
+  digitalWrite(redPin, HIGH);
+  Serial.println(pinOn);  // Transmit "ON" status to terminal
+  delay(lightDelay);      // Execute temporal delay
+  
+  // State 2: Active-LOW
+  digitalWrite(redPin, LOW);
+  Serial.println(pinOff); // Transmit "OFF" status to terminal
+  delay(lightDelay);      // Execute temporal delay
+}
+```
