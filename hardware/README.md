@@ -636,3 +636,98 @@ void loop() {
   delay(waitT);
 }
 ```
+
+## Lesson 13: PWM Brightness Control via Potentiometer & Exponential Scaling
+
+**Date:** June 6, 2026
+
+---
+
+### Objective
+
+This lesson focused on implementing closed-loop brightness control — using a potentiometer to dynamically adjust LED output via PWM. The core challenge was translating two incompatible integer ranges into a unified linear mapping, then identifying the limitations of that approach and implementing an exponential correction.
+
+---
+
+### I. The Domain Mismatch Problem
+
+The potentiometer's ADC output spans 0–1023 (10-bit resolution), while `analogWrite()` accepts values in the range 0–255 (8-bit PWM). Direct assignment without scaling would result in integer overflow beyond value 255, clipping the upper 75% of potentiometer travel.
+
+---
+
+### II. Linear Scaling via Point-Slope Form
+
+To resolve the domain mismatch, a linear transformation was derived using two known boundary conditions as coordinate pairs:
+
+- Minimum: (potVal = 0, writeVal = 0)
+- Maximum: (potVal = 1023, writeVal = 255)
+
+**Slope Calculation:**
+
+```
+m = (y₂ - y₁) / (x₂ - x₁) = (255 - 0) / (1023 - 0) = 255/1023
+```
+
+**Applying Point-Slope Form:**
+
+```
+y - y₁ = m(x - x₁)
+y - 0 = (255/1023)(x - 0)
+```
+
+**Final Mapping Equation:**
+
+```
+writeVal = (255.0 / 1023.0) × potVal
+```
+
+---
+
+### III. Implementation Note — Float Declaration
+
+An intentional error was introduced and corrected during this lesson: the slope must be computed as a floating-point operation. Writing `255/1023` performs integer division and returns `0`. The correct syntax requires a decimal indicator:
+
+```cpp
+bright = (255.0 / 1023.0) * potVal;
+```
+
+The `.0` suffix forces the compiler to treat the operand as a float, preserving decimal precision.
+
+---
+
+### IV. Perceptual Limitation of Linear Scaling
+
+Hardware verification revealed a perceptual flaw in the linear model: brightness changes are clearly visible in the lower range of values but become imperceptible in the upper range. This is due to the human eye's non-linear response to light intensity — sensitivity follows a logarithmic curve, not a linear one.
+
+**Conclusion:** A linear mapping produces a technically correct signal but a perceptually uneven user experience. To achieve uniform perceived brightness across the full potentiometer range, a non-linear (exponential) mapping is required.
+
+---
+
+### V. Exponential Scaling Model
+
+To correct for perceptual non-linearity, an exponential mapping was derived. The target behavior maps potVal = 1023 to writeVal = 255 (2⁸ - 1).
+
+**Deriving the Exponential Base:**
+
+```
+potVal / x = 8  (target exponent at maximum)
+1023 / x = 8
+x = 127.875
+```
+
+**Exponential Mapping Equation:**
+
+```
+writeVal = 2^(potVal / 127.875) - 1
+```
+
+This maps the lower potentiometer range to a compressed output (slow brightness increase) and the upper range to an expanded output (rapid brightness increase), correcting for the eye's logarithmic response.
+
+---
+
+### VI. Homework
+
+Implement both scaling approaches in firmware and compare the perceptual result on hardware:
+
+1. **Linear Implementation** — `writeVal = (255.0 / 1023.0) * potVal`
+2. **Exponential Implementation** — `writeVal = pow(2, potVal / 127.875) - 1`
