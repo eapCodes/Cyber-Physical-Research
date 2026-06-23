@@ -731,3 +731,127 @@ Implement both scaling approaches in firmware and compare the perceptual result 
 
 1. **Linear Implementation** — `writeVal = (255.0 / 1023.0) * potVal`
 2. **Exponential Implementation** — `writeVal = pow(2, potVal / 127.875) - 1`
+
+## Lesson 14: Serial Input & Data Type Handling
+
+**Date:** June 6, 2026
+
+---
+
+### Objective
+
+This lesson establishes the foundational pattern for acquiring runtime user input via the Serial Monitor. A three-step execution model — Ask, Wait, Read — is introduced and applied across three primary data types: integer, float, and string. While simple in structure, precise configuration of data types and Serial Monitor settings is critical for accurate data acquisition.
+
+---
+
+### The Ask, Wait, Read Pattern
+
+All serial input operations follow the same three-step model regardless of data type:
+
+- **Ask** — Prompt the user via `Serial.println()`
+- **Wait** — Block execution with `while(Serial.available()==0){}` until data is present in the buffer
+- **Read** — Parse the incoming data with the appropriate function for the target data type
+
+This pattern accounts for the asynchronous nature of serial communication — execution must be held until data is confirmed in the buffer before parsing can proceed.
+
+---
+
+### I. Ask
+
+To enable Serial Monitor interaction, `Serial.begin(9600)` must be called in `void setup()`. A variable of the appropriate data type is declared globally to hold the incoming value. The prompt is then issued inside `void loop()`:
+
+```cpp
+int userInt;
+int bru = 9600;
+
+void setup() {
+  Serial.begin(bru);
+}
+
+void loop() {
+  Serial.println("What is your integer?");
+}
+```
+
+**Note:** The declared data type must match the expected user input. A type mismatch (e.g. declaring `int` when the user enters a float) will result in data loss or incorrect parsing.
+
+---
+
+### II. Wait
+
+Unlike higher-level languages, Arduino's `loop()` executes indefinitely without a native blocking mechanism for asynchronous input. A `while` loop conditioned on `Serial.available() == 0` holds execution until data arrives in the serial buffer. Once a byte is detected, the condition becomes false and execution continues:
+
+```cpp
+int userInt;
+int bru = 9600;
+
+void setup() {
+  Serial.begin(bru);
+}
+
+void loop() {
+  Serial.println("What is your integer?");
+  while(Serial.available() == 0) {
+  }
+}
+```
+
+---
+
+### III. Read
+
+Once data is available, the appropriate parse function extracts the value from the buffer and assigns it to the declared variable. A two-part print statement outputs the result — `Serial.print()` for the static label and `Serial.println()` for the dynamic variable:
+
+```cpp
+int userInt;
+int bru = 9600;
+
+void setup() {
+  Serial.begin(bru);
+}
+
+void loop() {
+  Serial.println("What is your integer?");
+  while(Serial.available() == 0) {
+  }
+  userInt = Serial.parseInt();
+  Serial.print("Your integer is: ");
+  Serial.println(userInt);
+}
+```
+
+---
+
+### IV. Configuration Notes
+
+- **Data type deliberation:** The declared variable type must match the expected input. Integer, float, and string each require a different parse function: `parseInt()`, `parseFloat()`, and `readString()` respectively.
+- **Serial Monitor line ending:** The Serial Monitor must be set to "No Line Ending." Incorrect line ending settings cause multi-part values (e.g. 3.14) to be parsed as separate transmissions — first `3`, then `.14`.
+
+---
+
+### V. Homework
+
+The homework builds incrementally on the previous two assignments. Lesson 12 established potentiometer-to-PWM linear scaling. Lesson 13 introduced exponential scaling to correct for the human eye's non-linear brightness perception. This lesson adds a user input layer — rather than reading directly from the potentiometer, the user specifies a brightness level from 0–10 via the Serial Monitor. The 0–10 input is then mapped to the 0–255 PWM range using the exponential formula derived in Lesson 13.
+
+```cpp
+int ledPin = 11;
+int baud = 9600;
+float userBri;
+float writeVal;
+
+void setup() {
+  pinMode(ledPin, OUTPUT);
+  Serial.begin(baud);
+}
+
+void loop() {
+  Serial.println("Enter brightness (0-10): ");
+  while(Serial.available()==0){}
+  userBri = Serial.parseFloat();
+  Serial.print("Brightness selected: ");
+  Serial.println(userBri);
+
+  writeVal = pow(2, userBri / 25.5) - 1;
+  analogWrite(ledPin, writeVal);
+}
+```
