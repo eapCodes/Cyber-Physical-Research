@@ -855,3 +855,220 @@ void loop() {
   analogWrite(ledPin, writeVal);
 }
 ```
+
+## Lesson 15: Exponential PWM Scaling via Serial User Input
+
+**Date:** June 2026
+
+---
+
+### Objective
+
+This lesson reviews and implements the exponential brightness control homework from Lesson 14. A user-defined brightness level (0–10) is acquired via the Serial Monitor and mapped to a PWM output range (0–255) using an exponential scaling equation, correcting for the human eye's non-linear perception of light intensity.
+
+---
+
+### I. The Perceptual Problem with Linear Scaling
+
+Linear brightness increments produce uneven perceptual results. Equal numerical steps across the lower range (e.g. 0–25) appear as dramatic brightness jumps, while the same step size in the upper range (e.g. 230–255) becomes nearly imperceptible. This occurs because human brightness perception follows a logarithmic curve, not a linear one. Exponential scaling corrects this by compressing low-end output and expanding high-end output to match perceptual sensitivity.
+
+---
+
+### II. Deriving the Exponential Mapping Equation
+
+The target behavior maps a user input of 0–10 to a PWM exponent range of 0–8, since 2^8 = 256 represents the upper boundary of the 8-bit PWM register.
+
+**Known boundary conditions:**
+- (ui = 0, xp = 0)
+- (ui = 10, xp = 8)
+
+**Slope calculation:**
+
+```
+m = (y₂ - y₁) / (x₂ - x₁) = (8 - 0) / (10 - 0) = 8/10
+```
+
+**Applying point-slope form:**
+
+```
+xp = (8/10) × ui
+```
+
+**Final PWM mapping equation:**
+
+```
+writeVal = 2^((8/10) × ui) - 1
+```
+
+The subtraction of 1 ensures the output resolves to 0 when the user inputs 0, preventing a non-zero floor value.
+
+---
+
+### III. Implementation
+
+```cpp
+int ui;
+int writeVal;
+int redPin = 9;
+int br = 9600;
+String prompt = "Please input desired brightness (0-10): ";
+
+void setup() {
+  pinMode(redPin, OUTPUT);
+  Serial.begin(br);
+}
+
+void loop() {
+  Serial.println(prompt);
+  while(Serial.available() == 0) {
+  }
+  ui = Serial.parseInt();
+  writeVal = pow(2, (8./10.) * ui) - 1;
+  analogWrite(redPin, writeVal);
+  Serial.print("Write value: ");
+  Serial.println(writeVal);
+}
+```
+
+---
+
+### IV. Debugging Notes
+
+- **PWM pin requirement:** `analogWrite()` requires a PWM-capable pin, identifiable by the `~` symbol on the board silkscreen. Assigning to a non-PWM pin produces undefined behavior.
+- **Missing `pinMode()`:** Omitting `pinMode(redPin, OUTPUT)` in `void setup()` causes the pin to behave unpredictably. Output pins must be explicitly declared before use.
+- **Board reset on compile:** The Serial Monitor prompt does not appear until the board completes its initialization cycle. Resetting the board after upload ensures the prompt displays correctly.
+
+---
+
+### V. Homework
+
+Implement the exponential brightness control sketch if not completed in the previous lesson.
+
+## Lesson 16: Conditional Logic & Compound Expressions
+
+**Date:** June 2026
+
+---
+
+### Objective
+
+Conditional statements extend the Arduino's control flow beyond sequential execution, enabling hardware responses to be gated on evaluated conditions. This lesson covers the full suite of comparison operators, boundary conditions, equality vs. assignment, the modulo operator, compound conditionals, and string-based conditionals.
+
+---
+
+### I. The Role of Conditionals in Embedded Systems
+
+Sequential execution alone cannot model real-world control logic. A temperature-controlled fan, for example, requires the system to continuously evaluate a condition (temperature > threshold) and actuate accordingly. Conditional statements provide this capability — the loop() function cycles indefinitely while if blocks execute only when their evaluated condition resolves to true.
+
+---
+
+### II. Comparison Operators
+
+| Operator | Meaning |
+|----------|---------|
+| `>`  | Greater than |
+| `<`  | Less than |
+| `>=` | Greater than or equal to |
+| `<=` | Less than or equal to |
+| `==` | Equal to (comparison) |
+| `!=` | Not equal to |
+
+**Critical distinction:** `=` is assignment; `==` is comparison. Using `=` inside a conditional assigns a value rather than evaluating one, producing incorrect behavior without a compiler error.
+
+---
+
+### III. Boundary Conditions
+
+When defining thresholds, boundary values require careful operator selection. A condition checking `if(myNum > 10)` excludes the value 10 itself. To include the boundary, `>=` must be used. Failing to account for boundary inclusion is a common source of logic errors in control systems.
+
+---
+
+### IV. The Modulo Operator
+
+The modulo operator (`%`) returns the integer remainder of a division operation. This enables parity checks — a remainder of 0 indicates an even number, while any non-zero remainder indicates odd. For negative inputs, `abs()` must be applied to the remainder before comparison, as negative modulo results can produce unexpected values:
+
+```cpp
+rem = myNum % 2;
+if(abs(rem) == 1) {
+  Serial.println("Your number is odd.");
+}
+if(rem == 0) {
+  Serial.println("Your number is even.");
+}
+```
+
+---
+
+### V. Compound Conditionals
+
+Multiple conditions can be evaluated simultaneously using logical operators:
+
+- `&&` (AND) — both conditions must be true
+- `||` (OR) — at least one condition must be true
+
+```cpp
+if(myNum > 0 && rem == 0) {
+  Serial.println("Positive even number.");
+}
+if(myNum < 0 && abs(rem) == 1) {
+  Serial.println("Negative odd number.");
+}
+```
+
+---
+
+### VI. String Conditionals & Case Normalization
+
+String comparisons are case-sensitive by default. To eliminate redundant conditions covering every capitalization variant, `.toLowerCase()` normalizes the input before comparison:
+
+```cpp
+myColor = Serial.readString();
+myColor.trim();
+myColor.toLowerCase();
+
+if(myColor == "red") {
+  Serial.println("RED Alert!");
+}
+```
+
+`.trim()` removes leading and trailing whitespace, which Serial input frequently introduces.
+
+---
+
+### VII. Homework
+
+Wire a red, yellow, and green LED to separate digital output pins. Accept a color string from the user via the Serial Monitor and activate the corresponding LED.
+
+```cpp
+int redPin = 13;
+int yellowPin = 7;
+int greenPin = 12;
+String ui;
+int br = 9600;
+String prompt = "What color do you want on? (red, green, yellow): ";
+
+void setup() {
+  Serial.begin(br);
+  pinMode(redPin, OUTPUT);
+  pinMode(yellowPin, OUTPUT);
+  pinMode(greenPin, OUTPUT);
+}
+
+void loop() {
+  Serial.println(prompt);
+  while(Serial.available() == 0) {
+  }
+  ui = Serial.readString();
+  ui.trim();
+  ui.toLowerCase();
+
+  if(ui == "red") {
+    digitalWrite(redPin, HIGH);
+  }
+  if(ui == "yellow") {
+    digitalWrite(yellowPin, HIGH);
+  }
+  if(ui == "green") {
+    digitalWrite(greenPin, HIGH);
+  }
+}
