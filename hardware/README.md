@@ -1218,3 +1218,111 @@ void loop() {
     analogWrite(yellowPin, 0);
   }
 }
+```
+## Lesson 18: Controlling RGB LED with an Arduino
+**Date:** 21 July, 2026
+
+### Objective: 
+The RGB LED houses three independent color channels on a shared ground, requiring individual current limiting per channel. This lesson covers hardware configuration and firmware control to produce both primary and mixed colors through PWM output.
+
+### RGB LED:
+The RGB LED has four legs instead of the usual two. Holding the shortest leg to the right; from left to right they're red, ground, green, blue. Three LEDs are sharing a common ground, three resistors are needed for each. **Resistors can not be shared between one RBG LED!** If one resistor is shared there will be cross channel chatter; turning on the green LED then the red will cause the channels to cross each other. Causing more voltage to the resistor while dimming other LEDs. More legs means be careful of Lead interference when setting up the breadboard.
+
+**Components:**
+
+| QTY | Part |
+|-----|------|
+| 1x  | Arduino Uno R4 Wifi |
+| 1x  | Breadboard |
+| 1x  | RBG LED |
+| 3x  | Resistors (1KΩ) |
+| 4x  | Jumper Wires (red, green, blue, black) |
+
+
+**BreadBoard Layout:**
+
+With the RGB LEDs longes leg to the right place the first leg into C5 allow the rest to fallow the row. Connect a jumper cable in columns 6a\b to the + rail for ground, connect a jumper wire form + rail ro GND on Arduino.. Connect resistors above each leg skipping the ground(e5, e7,e8) then to row h respectively. Connect jumper cables color coded to the RGB LED above the resistors (red i5, blue i7, green i8). Connect each one to a ~# in case changing hte brightness is needed i5 -> ~9, i7 -> ~10, i8 -> ~11.
+
+![RGB LED Circuit](lesson18_circuit.png)
+
+**Code:**
+Three integer constants store the digital pin assignment for each LED output pin channel. One integer constant stores digital assignment for boar rate. All variables are declared globally to ensure that both `void setup()` and `void loop()` have access to variables.
+
+```cpp
+int redPin = 9;
+int greenPin = 10;
+int bluePin = 11;
+int br = 115200;
+```
+Each pin is registered in `void setup()` via `pinMode()` before the main loop as usual. Along side `Serial.begin()` as the serial Monitor is utilized.
+
+Using `digitalWrite(pin, HIGH)` will turn the LED to the desired color.
+
+## Homework
+Ask the user what color they would like the LED to display form the fallowing pool red, green, blue, cyan, magenta, yellow, orange, white.
+
+```cpp
+int redPin = 9;
+int greenPin = 10;
+int bluePin = 11;
+int br = 115200;
+String prompt = "Enter a color red/green/blue/cyan/magenta/yellow/orange/white";
+String userColor;
+
+void setup() {
+Serial.begin(br);
+pinMode(redPin,OUTPUT);
+pinMode(greenPin, OUTPUT);
+pinMode(bluePin, OUTPUT);
+}
+
+void loop() {
+Serial.println(prompt);
+while(Serial.available()==0){}
+userColor = Serial.readString();
+userColor.toLowerCase();
+userColor.trim();
+Serial.println(userColor);
+
+if (userColor == "red") {
+    analogWrite(redPin,255);
+    analogWrite(greenPin,0);
+    analogWrite(bluePin,0);
+}
+if (userColor == "green") {
+    analogWrite(redPin,0);
+    analogWrite(greenPin,255);
+    analogWrite(bluePin,0);
+}
+if (userColor == "blue") {
+    analogWrite(redPin,0);
+    analogWrite(greenPin,0);
+    analogWrite(bluePin,255);
+}
+if (userColor == "cyan") {
+    analogWrite(redPin,0);
+    analogWrite(greenPin,255);
+    analogWrite(bluePin,255);
+}
+if (userColor == "magenta") {
+    analogWrite(redPin,255);
+    analogWrite(greenPin,0);
+    analogWrite(bluePin,255);
+}
+if (userColor == "yellow") {
+    analogWrite(redPin,255);
+    analogWrite(greenPin,255);
+    analogWrite(bluePin,0);
+}
+if (userColor == "orange") {
+    analogWrite(redPin,255);
+    analogWrite(greenPin,165);
+    analogWrite(bluePin,0);
+}
+if (userColor == "white") {
+    analogWrite(redPin,255);
+    analogWrite(greenPin,255);
+    analogWrite(bluePin,255);
+}
+}
+```
