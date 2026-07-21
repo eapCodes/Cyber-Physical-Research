@@ -1072,6 +1072,7 @@ void loop() {
     digitalWrite(greenPin, HIGH);
   }
 }
+```
 
 ## Lesson 17: Controlling Multiple LEDs via Serial Monitor
 
