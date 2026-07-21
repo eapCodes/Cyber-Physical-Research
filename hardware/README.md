@@ -1072,3 +1072,148 @@ void loop() {
     digitalWrite(greenPin, HIGH);
   }
 }
+
+## Lesson 17: Controlling Multiple LEDs via Serial Monitor
+
+**Date:** July 2026
+
+---
+
+### Objective
+
+This lesson consolidates prior concepts into a complete multi-output control system. A three-LED circuit is constructed, and user input acquired via the Serial Monitor determines which LED is activated. The homework extends this by adding exponential brightness control, combining serial input, string conditionals, and PWM output into a single firmware implementation.
+
+---
+
+### I. Hardware Configuration
+
+**Components:**
+
+| QTY | Part |
+|-----|------|
+| 3x  | LEDs (red, yellow, green) |
+| 1x  | Arduino Uno R4 WiFi |
+| 1x  | Breadboard |
+| 3x  | 1kΩ resistors |
+| 4x  | Jumper wires |
+
+**Breadboard Layout:**
+
+LEDs are placed in the same row with one column gap between each to prevent lead interference. Each cathode (short leg) column receives a dedicated 1kΩ current-limiting resistor, with all resistors terminating on the ground rail — enabling a single ground return wire for all three branches. Each anode (long leg) connects via jumper wire to its assigned digital output pin. Color-coded wires are recommended to simplify visual debugging.
+
+---
+
+### II. Firmware Architecture
+
+Three integer constants store the digital pin assignments for each LED output channel. A `String` variable holds the runtime user input, and a second `String` stores the serial prompt displayed to the user. All variables are declared globally to ensure accessibility across both `void setup()` and `void loop()`.
+
+```cpp
+int redPin = 9;
+int yellowPin = 10;
+int greenPin = 11;
+String userColor;
+int br = 9600;
+String userPrompt = "Please enter color (red/yellow/green): ";
+```
+
+Each output pin is registered in `void setup()` via `pinMode()` before the main loop begins execution.
+
+---
+
+### III. Serial Input — Ask, Wait, Read
+
+User input is acquired using the established three-step serial pattern:
+
+**Ask:** The prompt string is transmitted to the Serial Monitor each loop cycle:
+```cpp
+Serial.println(userPrompt);
+```
+
+**Wait:** Execution is held until data arrives in the serial buffer:
+```cpp
+while(Serial.available() == 0) {}
+```
+
+**Read:** The input string is read, whitespace trimmed, and normalized to lowercase to ensure case-insensitive comparison:
+```cpp
+userColor = Serial.readString();
+userColor.trim();
+userColor.toLowerCase();
+```
+
+---
+
+### IV. Conditional Output Control
+
+Each `if` block evaluates the normalized input string and activates the corresponding LED while explicitly setting all remaining outputs to LOW. This ensures mutual exclusivity — only one LED can be active at any given time:
+
+```cpp
+if (userColor == "green") {
+  digitalWrite(greenPin, HIGH);
+  digitalWrite(yellowPin, LOW);
+  digitalWrite(redPin, LOW);
+}
+if (userColor == "yellow") {
+  digitalWrite(yellowPin, HIGH);
+  digitalWrite(greenPin, LOW);
+  digitalWrite(redPin, LOW);
+}
+if (userColor == "red") {
+  digitalWrite(redPin, HIGH);
+  digitalWrite(greenPin, LOW);
+  digitalWrite(yellowPin, LOW);
+}
+```
+
+---
+
+### V. Homework: Color Selection with Exponential Brightness Control
+
+The homework extends the base implementation by adding a second user input — a brightness level from 0–10 — mapped to PWM output using the exponential scaling equation derived in Lesson 15. PWM-capable pins are required for `analogWrite()` output.
+
+```cpp
+int greenPin = 9;
+int yellowPin = 5;
+int redPin = 3;
+int br = 9600;
+String userColor;
+float userBright;
+float writeVal;
+String userPrompt = "Please enter brightness (0-10): ";
+String userPrompt2 = "Please enter color (red/green/yellow): ";
+
+void setup() {
+  Serial.begin(br);
+  pinMode(greenPin, OUTPUT);
+  pinMode(yellowPin, OUTPUT);
+  pinMode(redPin, OUTPUT);
+}
+
+void loop() {
+  Serial.println(userPrompt2);
+  while(Serial.available() == 0) {}
+  userColor = Serial.readString();
+  userColor.trim();
+  userColor.toLowerCase();
+
+  Serial.println(userPrompt);
+  while(Serial.available() == 0) {}
+  userBright = Serial.parseFloat();
+  writeVal = pow(2, userBright * 0.8) - 1;
+
+  if (userColor == "green") {
+    analogWrite(greenPin, writeVal);
+    analogWrite(yellowPin, 0);
+    analogWrite(redPin, 0);
+  }
+  if (userColor == "yellow") {
+    analogWrite(yellowPin, writeVal);
+    analogWrite(greenPin, 0);
+    analogWrite(redPin, 0);
+  }
+  if (userColor == "red") {
+    analogWrite(redPin, writeVal);
+    analogWrite(greenPin, 0);
+    analogWrite(yellowPin, 0);
+  }
+}
