@@ -1326,3 +1326,124 @@ if (userColor == "white") {
 }
 }
 ```
+## Lesson 19: mixing Colors with an RGB LED
+**Date:** July 22, 2026
+### objective:
+The RGB LED unlocks every color configurable from an RGB number combination by using variable PWM intensity to drive a user-selected color via serial input
+### I. Summary of RGB LED
+Homework assigned last week was prompt the user to pick a color from red, green, blue, cyan, magenta, orange, yellow, white. RGB LED has four legs holding the shortest to the right they are as follows red, ground, green, and blue. Each leg must have a dedicated resister, this negates any cross channel chatter or any voltage reduction from multiple LEDs. PWM pins are recommended in case light brightness needs to be changed. Since the second leg is the ground leg use a jumper cable to connect to the rail to easily connect to ground. In the same column as each resister use color coded jumper cables to connect to the previous mentioned PWM pins.
+### II. Code architecture
+**Initial Arduino IDE setup**
+Ensure to use a clean sketch file > basic > bare minimum. Ensure the correct Arduino board is selected tools > board > select correct board and use the correct port tools > port > select COM that board is located 
+**Declaring Global Variables**
+RGB LED is made up of three LEDs therefore use three integer constants to store the digital pin assignment for each output channel, redPin, greenPin, bluePin will be used. following the diagram below redPin goes to ~9, greenPin goes to ~10, and bluePin goes to ~11. Serial monitor will be used, use another constant to store the baud rate. A string prompt is used as well as a string variable to store user response.
+
+**Breadboard Diagram**
+
+![RGB LED Circuit](lesson18_circuit.png)
+
+**Global variable code**
+
+```cpp
+int redPin = 9;
+int greenPin = 10;
+int bluePin = 11;
+int br = 115200; 
+String prompt = "Enter a color red/green/blue/cyan/magenta/yellow/orange/white";
+String userColor;
+```
+> [!WARNING]
+> Notice the boad rate is 115200, ensure the number on the serial monitor matches this number. Serial monitor must also be set to no line ending.
+
+**void setup**
+
+Serial monitor will be utilized, `Serial.begin()` must be initialized in the setup. Each pin needs a dedicated `pinMode()`
+```cpp
+void setup() {
+Serial.begin(br);
+pinMode(redPin,OUTPUT);
+pinMode(greenPin, OUTPUT);
+pinMode(bluePin, OUTPUT);
+}
+```
+**void loop**
+
+Previous "ask, wait, read" strategy to get user input is utilized in this section. First ask, print the prompt that was declared globally to the serial monitor `Serial.println()` allowing the user to then respond. After responding data will be in the serial monitor, using wait to check `while(Serial.available()==0){}` if there is data the code continues. To read, use the string variable to store what is in the serial monitor `userColor = Serial.readString()` the expected data is a string that is why `serial.readString()` is used. Users can anser any way they like as long as they spell it correctly. To increase accuracy in the if statements use `.trim()` to remove leading adn trailing whitespace characters and `.toLowerCase()` to simplify the condition process. to check what color is chosen use an if statement for each color. Fully utilize an RGB LED by using analogWrite to choose how much light to give off to allow color mixing.
+
+```cpp
+void loop() {
+Serial.println(prompt);
+while(Serial.available()==0){}
+userColor = Serial.readString();
+userColor.trim();
+userColor.toLowerCase();
+Serial.println(userColor);
+
+if (userColor == "red") {
+    analogWrite(redPin,255);
+    analogWrite(greenPin,0);
+    analogWrite(bluePin,0);
+}
+if (userColor == "green") {
+    analogWrite(redPin,0);
+    analogWrite(greenPin,255);
+    analogWrite(bluePin,0);
+}
+if (userColor == "blue") {
+    analogWrite(redPin,0);
+    analogWrite(greenPin,0);
+    analogWrite(bluePin,255);
+}
+if (userColor == "cyan") {
+    analogWrite(redPin,0);
+    analogWrite(greenPin,255);
+    analogWrite(bluePin,255);
+}
+// rest of colors
+}
+```
+**Extra Information**
+- check work before copy and pasting.
+- computer does exactly what it's been told of there is an error it was something you did.
+- Use a RBG color finder to find the exact number combinations.
+- LEDs may be built different if the color looks off manually change the range.
+- A diffuser may prove useful to see the true color being implemented.
+### III. Next Homework:
+Leave the RGB hooked up as is but flash the sequence red, green, blue exactly 25 times. 
+
+```cpp
+int redPin = 9;
+int greenPin = 10;
+int bluePin = 11;
+int bTime = 200;
+int dTime = 500;
+int eTime = 700;
+
+void setup() {
+pinMode(redPin,OUTPUT);
+pinMode(greenPin, OUTPUT);
+pinMode(bluePin, OUTPUT);
+}
+
+void loop() {
+for (int i = 0; i < 25; i++){
+analogWrite(redPin, 255);
+delay(bTime);
+analogWrite(redPin, 0);
+delay(dTime);
+
+analogWrite(greenPin, 255);
+delay(bTime);
+analogWrite(greenPin, 0);
+delay(dTime);
+
+analogWrite(bluePin, 255);
+delay(bTime);
+analogWrite(bluePin, 0);
+delay(dTime);
+
+delay (eTime);
+}
+while(Serial.available()== 0){}
+}
+```
